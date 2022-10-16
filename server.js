@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 const connectDB = require('./config/dbConfig');
+var glob = require('glob');
 const fs = require('fs');
 
 // env config
@@ -19,6 +20,17 @@ app.use(cors());
 
 // Body Parser
 app.use(bodyParser.json());
+
+// ======= register routes
+glob('./routes/*.route.js', {}, (err, files) => {
+  files.forEach((route) => {
+    const stats = fs.statSync(route);
+    const fileSizeInBytes = stats.size;
+    if (fileSizeInBytes) {
+      require(route)(app, express);
+    }
+  });
+});
 
 // Static Files
 app.use(express.static('public'));
